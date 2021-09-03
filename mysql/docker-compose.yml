@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  mysql8:
+    image: mysql_rabbitgather
+    build: ./
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - ./datadir:/var/lib/mysql
+      - ./mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+    environment:
+      MYSQL_ROOT_PASSWORD: imjsck00
+    restart: always
