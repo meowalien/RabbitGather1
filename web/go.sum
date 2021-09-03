@@ -1,7 +1,7 @@
 github.com/bwmarrin/snowflake v0.3.0 h1:xm67bEhkKh6ij1790JB83OujPR5CzNe8QuQqAgISZN0=
 github.com/bwmarrin/snowflake v0.3.0/go.mod h1:NdZxfVWX+oR6y2K0o6qAYv6gIOP9rjG0/E9WsDpxqwE=
-github.com/meowalien/tools v0.0.0-20210903063458-a05cbabcf909 h1:zC/sNI2aJuzU8t8yRt221Peul7ZRPrXojei4EM++KBI=
-github.com/meowalien/tools v0.0.0-20210903063458-a05cbabcf909/go.mod h1:IWSTWawX3a8PRHWhtX+sgdwT1wCguJ7tuS4KmXFF6pg=
+github.com/meowalien/go-util v0.0.0-20210903064507-c093fe3afdd2 h1:8CaE8zjS2aSf6vUdK83xTknELi2KZBYSAqbup/u0Qfg=
+github.com/meowalien/go-util v0.0.0-20210903064507-c093fe3afdd2/go.mod h1:r2NTLrtJY4yjXSqay08u8/JHmH8sINh1v6iLP2N/Gbw=
 golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 h1:HWj/xjIHfjYU5nVXpTM0s39J9CbLn7Cc5a7IC5rwsMQ=
 golang.org/x/crypto v0.0.0-20210817164053-32db794688a5/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
