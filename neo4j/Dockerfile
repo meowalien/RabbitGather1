@@ -1,5 +1,5 @@
-FROM centos
-FROM mysql:8.0
-EXPOSE 3306
-ADD mysql.cnf /etc/mysql/conf.d/my.cnf
-CMD ["mysqld"]
+#FROM neo4j:4.3.3-community
+##EXPOSE 7474
+##EXPOSE 7474
+#EXPOSE 7687
+
