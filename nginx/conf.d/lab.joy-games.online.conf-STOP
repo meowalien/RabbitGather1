@@ -1,0 +1,27 @@
+server {
+
+        listen       443 ssl;
+        #server_name  lab.joy-games.online;
+        server_name  *.joy-games.online;
+        root         /data/web;
+
+	ssl_certificate /data/Cert/joy-games.online/fullchain.pem;
+	ssl_certificate_key /data/Cert/joy-games.online/privkey.pem;
+	ssl_trusted_certificate /data/Cert/joy-games.online/chain.pem;
+
+	gzip on;
+	gzip_types *;
+	gzip_disable "MSIE [1-6].(?!.*SV1)";
+
+        #location / {
+        #add_header Cache-Control no-cache;
+        #}
+
+    location ~* \.(jpg|jpeg|png|css|js|json|html|mp3)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+        }
+
+
+
+    }

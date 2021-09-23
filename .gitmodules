@@ -1,0 +1,6 @@
+[submodule ".\\services\\article\\"]
+	path = .\\services\\article\\
+	url = git@github.com:meowalien/rabbitgather-article.git
+[submodule ".\\services\\lib\\"]
+	path = .\\services\\lib\\
+	url = git@github.com:meowalien/rabbitgather-lib.git

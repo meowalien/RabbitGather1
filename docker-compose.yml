@@ -1,16 +1,16 @@
 version: "3.3"
 
 networks:
-  outer-gateway:
+  outer:
     external: true
   internal:
     external: false
 
 services:
   traefik:
+    container_name: rabbitgather/traefik
     image: traefik:v2.0
     restart: always
-    container_name: traefik
     ports:
       - "80:80" # <== http
       - "8080:8080" # <== :8080 is where the dashboard runs on
@@ -23,54 +23,46 @@ services:
       - ./traefik/ssl/__meowalien_com.crt:/__meowalien_com.crt
       - ./traefik/ssl/__meowalien_com.key:/__meowalien_com.key
     networks:
-      - outer-gateway # <== Placing traefik on the network named web, to access containers on this network
+      - outer # <== Placing traefik on the network named web, to access containers on this network
 #    labels:
 #      #### Labels define the behavior and rules of the traefik proxy for this container ####
 #      - "traefik.enable=true" # <== Enable traefik on itself to view dashboard and assign subdomain to view it
 #      - "traefik.http.routers.api.rule=Host(`traefik_dashboard.meowalien.com`)" # <== Setting the domain for the dashboard
 #      - "traefik.http.routers.api.service=api@internal" # <== Enabling the api to be a service to access
 
-
-  web:
-    image: rabbitgather/web
-    container_name: rabbitgather_web
-    build: services/web
-    depends_on:
-      - traefik
-      - mysql
-      - neo4j
-#    ports:
-#      - "800:80" # <== http
-
+  nginx:
+    container_name: rabbitgather/nginx
+    image: nginx:1.20.1
     networks:
-      - outer-gateway
-      - internal
+      - outer
+    volumes:
+      - ./web:/web
+      - ./nginx/conf.d:/etc/nginx/conf.d
     labels:
-      #### Labels define the behavior and rules of the traefik proxy for this container ####
-      - "traefik.enable=true" # <== Enable traefik to proxy this container
-      - "traefik.http.routers.rabbitgather-web.rule=Host(`web.meowalien.com`)" # <== Your Domain Name goes here for the http rule
+      - "traefik.enable=true"
+      - "traefik.docker.network=outer"
+      - "traefik.http.services.rabbitgather-web.loadbalancer.server.port=80"
+      - "traefik.http.routers.rabbitgather-web.rule=Host(`meowalien.com`)"
       - "traefik.http.routers.rabbitgather-web.tls=true"
-      - "traefik.http.routers.rabbitgather-web.entrypoints=https" # <== Defining the entrypoint for http, **ref: line 30
-      - "traefik.docker.network=outer-gateway"
-      - "traefik.http.services.rabbitgather-web.loadbalancer.server.port=443"
+      - "traefik.http.routers.rabbitgather-web.entrypoints=https"
 
-
-  mysql:
-    image: mysql:v8.0
-    build: ./mysql
+  mariadb:
+    container_name: rabbitgather/mariadb
+    build: ./mariadb
     ports:
       - "3307:3306"
     volumes:
-      - ./mysql/initdb:/docker-entrypoint-initdb.d
-      - ./mysql/datadir:/var/lib/mysql
-      - ./mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mariadb/datadir:/var/lib/mysql
+      - ./mariadb/initdb:/docker-entrypoint-initdb.d
     environment:
-      MYSQL_ROOT_PASSWORD: 31fmk#%#^%r2^u83r#@
+      MYSQL_ROOT_PASSWORD: debug
     restart: always
     networks:
       - internal
 
   neo4j:
+    container_name: rabbitgather/neo4j
     image: neo4j:4.3.3-community
     ports:
       - "7687:7687"
@@ -84,3 +76,13 @@ services:
     restart: always
     networks:
       - internal
+
+  article:
+    container_name: rabbitgather/article
+    build:
+      context: ./services/article
+      args:
+        - IsDebug=TURE
+    volumes:
+      - ./services/article/config/config_docker.json:/app/config/config.json
+

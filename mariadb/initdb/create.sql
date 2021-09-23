@@ -1,9 +1,9 @@
-
 create database `rabbit_gather` CHARACTER SET = utf8mb4;
-CREATE USER 'rabbit_gather'@'%' IDENTIFIED BY 'fijwo3iukcv83rj493#%@$#T$r038rd,fsl#%T#$@r3';
+CREATE USER 'rabbit_gather'@'%' IDENTIFIED BY '5678';
 GRANT ALL ON rabbit_gather.* TO 'rabbit_gather'@'%';
 FLUSH PRIVILEGES;
 
+use rabbit_gather;
 
 CREATE TABLE `user`
 (
