@@ -1,5 +1,0 @@
-#FROM neo4j:4.3.3-community
-##EXPOSE 7474
-##EXPOSE 7474
-#EXPOSE 7687
-
