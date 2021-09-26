@@ -1,6 +1,0 @@
-server {
-    listen 80;
-    server_name *.joy-games.online;
-
-    return 301 https://$host$request_uri;
-}
