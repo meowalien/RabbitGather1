@@ -4,6 +4,8 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/go-util" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/go-util" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/article" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/lib" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/services/article" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/services/lib" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/services/rabbitgather-lib" vcs="Git" />

@@ -9,6 +9,8 @@ networks:
 services:
   traefik:
     container_name: rabbitgather-traefik
+    networks:
+      - outer
     image: traefik:v2.0
     restart: always
     ports:
@@ -21,13 +23,15 @@ services:
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml
       - ./traefik/ssl/__meowalien_com.crt:/__meowalien_com.crt
       - ./traefik/ssl/__meowalien_com.key:/__meowalien_com.key
-    networks:
-      - outer
+
+
   nginx:
     container_name: rabbitgather-nginx
-    image: nginx:1.20.1
     networks:
       - outer
+    depends_on:
+      - traefik
+    image: nginx:1.20.1
     volumes:
       - ./web:/web
       - ./nginx/conf.d:/etc/nginx/conf.d
@@ -39,49 +43,6 @@ services:
       - "traefik.http.routers.rabbitgather-web.tls=true"
       - "traefik.http.routers.rabbitgather-web.entrypoints=https"
 
-  mariadb:
-    networks:
-      - internal
-    container_name: rabbitgather-mariadb
-    build: ./mariadb
-    ports:
-      - "3307:3306"
-    volumes:
-      - ./mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./mariadb/datadir:/var/lib/mysql
-      - ./mariadb/initdb:/docker-entrypoint-initdb.d
-    environment:
-      MYSQL_ROOT_PASSWORD: 1234
-    restart: always
-
-
-  neo4j:
-    networks:
-      - internal
-    container_name: rabbitgather-neo4jdb
-    image: neo4j:4.3.3-community
-    ports:
-      - "7688:7687"
-    volumes:
-      - ./neo4j/data:/data
-      - ./neo4j/logs:/logs
-      - ./neo4j/import:/var/lib/neo4j/import
-      - ./neo4j/plugins:/plugins
-    environment:
-      NEO4J_AUTH: neo4j/1234
-    restart: always
-
-  redis:
-    image: redis:6.2.5
-#    不知為啥就是無法自己讀取，只能手動設定
-    command: 'redis-server /usr/local/etc/redis/redis.conf'
-    ports:
-      - '6378:6379'
-    volumes:
-      - ./redis/data:/data
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-#    environment:
-#      REDIS_PASSWORD: 1234
 
   article:
     networks:
@@ -96,13 +57,60 @@ services:
       - "traefik.http.routers.rabbitgather-article-restful.entrypoints=https"
     container_name: rabbitgather-article
     build:
-      context: ./services/article
+      context: modules/article
     environment:
       DEBUG: "true"
     volumes:
-      - ./services/article/config/config_docker.json:/app/config/config.json
+      - ./modules/article/config/config_docker.json:/app/config/config.json
     depends_on:
       - traefik
-      - neo4j
+      - neo4jdb
       - mariadb
-      - redis
+      - redisdb
+
+
+  mariadb:
+    networks:
+      - internal
+    container_name: rabbitgather-mariadb
+    build: ./mariadb
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mariadb/datadir:/var/lib/mysql
+      - ./mariadb/initdb:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+    restart: always
+
+
+  neo4jdb:
+    networks:
+      - internal
+    container_name: rabbitgather-neo4jdb
+    image: neo4j:4.3.3-community
+    ports:
+      - "7687:7687"
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/plugins:/plugins
+    environment:
+      NEO4J_AUTH: neo4j/1234
+    restart: always
+
+  redisdb:
+    networks:
+      - internal
+    image: redis:6.2.5
+    #    不知為啥就是無法自己讀取，只能手動設定
+    command: 'redis-server /usr/local/etc/redis/redis.conf'
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+#    environment:
+#      REDIS_PASSWORD: 1234
