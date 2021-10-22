@@ -13,6 +13,7 @@ providers:
     network: outer-gateway
   file:
     filename: /dynamic.yaml
+
 entryPoints:
   http:
     address: :80

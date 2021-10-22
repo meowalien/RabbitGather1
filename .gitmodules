@@ -1,6 +1,0 @@
-[submodule "modules/lib"]
-	path = modules/lib
-	url = https://github.com/meowalien/rabbitgather-lib.git
-[submodule "modules/article"]
-	path = modules/article
-	url = https://github.com/meowalien/rabbitgather-article.git
