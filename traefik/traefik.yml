@@ -15,8 +15,6 @@ providers:
     filename: /dynamic.yaml
 
 entryPoints:
-  http:
-    address: :80
   https:
     address: :443
 

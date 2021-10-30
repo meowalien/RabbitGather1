@@ -1,30 +1,24 @@
 version: "3.3"
 
-
-
 services:
   traefik:
-    container_name: rabbitgather_traefik
-    #    network_mode: "host"
+    container_name: rabbitgather-traefik
     image: traefik:v2.0
     ports:
-      - "80:80"
       - "443:443"
-      - "8080:8080" #管理介面
+    #      - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # <== Volume for docker admin
-      - ./traefik/dynamic.yaml:/dynamic.yaml # <== Volume for dynamic conf file, **ref: line 27
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/dynamic.yaml:/dynamic.yaml
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml
       #     SSL憑證
-      - ./traefik/ssl/cert.pem:/cert.pem
-      - ./traefik/ssl/privkey.pem:/privkey.pem
-    labels:
-      - "traefik.docker.network=outer" #使用outer網路
+      - ./traefik/ssl/meowalien.com/cert.pem:/cert.pem
+      - ./traefik/ssl/meowalien.com/privkey.pem:/privkey.pem
+
     restart: always
 
-
   nginx:
-    container_name: rabbitgather_nginx
+    container_name: rabbitgather-nginx
     ports:
       - "8888:80"
     depends_on:
@@ -34,16 +28,15 @@ services:
       - ./web:/web
       - ./nginx/conf.d:/etc/nginx/conf.d
     labels:
-      - "traefik.enable=true" #允許由traefik管理路由
-      - "traefik.http.services.rabbitgather_nginx-web.loadbalancer.server.port=80" #容器監聽的端口
-      - "traefik.http.routers.rabbitgather_nginx-web.rule=Host(`web.meowalien.com`)"  #綁定的路由
-      - "traefik.http.routers.rabbitgather_nginx-web.tls=true" #使用TLS憑證
-      - "traefik.http.routers.rabbitgather_nginx-web.entrypoints=https" #使用https入口（在dynamic.yaml內定義）
+      - "traefik.enable=true"
+      - "traefik.http.services.rabbitgather-web.loadbalancer.server.port=80"
+      - "traefik.http.routers.rabbitgather-web.rule=Host(`rabbit_gather_web.meowalien.com`)"
+      - "traefik.http.routers.rabbitgather-web.tls=true"
+      - "traefik.http.routers.rabbitgather-web.entrypoints=https"
     restart: always
 
   mariadb:
-    container_name: rabbitgather_mariadb
-#    image: mariadb:10.4.21
+    container_name: rabbitgather-mariadb
     build: ./mariadb
     ports:
       - "3306:3306"
@@ -51,157 +44,34 @@ services:
       - ./mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./mariadb/datadir:/var/lib/mysql
       - ./mariadb/initdb:/docker-entrypoint-initdb.d
-      - ./mariadb/err-mariadb.log:/var/log/mariadb/err-mariadb.log
     environment:
-      MYSQL_ROOT_PASSWORD: 1234 #容器內mariadb 的root 使用者密碼
+      MYSQL_ROOT_PASSWORD: 1234
     restart: always
 
   redisdb:
-    container_name: rabbitgather_redisdb
+    container_name: rabbitgather-redisdb
     image: redis:6.2.5
     ports:
-      - "6379:6379" #方便測試，正式環境請關閉
+      - "6379:6379"
     volumes:
       - ./redis/data:/data
     restart: always
 
   #  核心
   core:
-    container_name: rabbitgather_core
+    container_name: rabbitgather-core
     ports:
       - "2001:2001"
     build:
-      context: app/core
+      context: api/core
     environment:
       DEBUG: "true"
     volumes:
-      - ./apps/core/config/config_docker.json:/app/config/config.json
-    depends_on:
-      - redisdb
-      - mariadb
-      - nginx
-      - traefik
+      - ./api/core/config/config_docker.json:/app/config/config.json
+      - ./api/core/log/:/app/log/
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.rabbitgather-core.loadbalancer.server.port=2001"
-      - "traefik.http.routers.rabbitgather-core.rule=Host(`core.meowalien.com`)"
-      - "traefik.http.routers.rabbitgather-core.tls=true" #使用TLS憑證
-      - "traefik.http.routers.rabbitgather-web.entrypoints=https" #使用https入口（在dynamic.yaml內定義）
-
-
-
-#
-#networks:
-#  outer:
-#    external: true
-#  internal:
-#    external: false
-#
-#services:
-#  traefik:
-#    container_name: rabbitgather-traefik
-#    networks:
-#      - outer
-#    image: traefik:v2.0
-#    restart: always
-#    ports:
-#      - "80:80" # <== http
-#      - "8080:8080" # <== :8080 is where the dashboard runs on
-#      - "443:443" # <== https
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock # <== Volume for docker admin
-#      - ./traefik/dynamic.yaml:/dynamic.yaml # <== Volume for dynamic conf file, **ref: line 27
-#      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
-#      - ./traefik/ssl/__meowalien_com.crt:/__meowalien_com.crt
-#      - ./traefik/ssl/__meowalien_com.key:/__meowalien_com.key
-#
-#
-#  nginx:
-#    container_name: rabbitgather-nginx
-#    networks:
-#      - outer
-#    depends_on:
-#      - traefik
-#    image: nginx:1.20.1
-#    volumes:
-#      - ./web:/web
-#      - ./nginx/conf.d:/etc/nginx/conf.d
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.docker.network=outer"
-#      - "traefik.http.services.rabbitgather-web.loadbalancer.server.port=80"
-#      - "traefik.http.routers.rabbitgather-web.rule=Host(`meowalien.com`)"
-#      - "traefik.http.routers.rabbitgather-web.tls=true"
-#      - "traefik.http.routers.rabbitgather-web.entrypoints=https"
-#
-#
-#  article:
-#    networks:
-#      - internal
-#      - outer
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.docker.network=outer"
-#      - "traefik.http.services.rabbitgather-article-restful.loadbalancer.server.port=2001"
-#      - "traefik.http.routers.rabbitgather-article-restful.rule=Host(`api.meowalien.com`)"
-#      - "traefik.http.routers.rabbitgather-article-restful.tls=true"
-#      - "traefik.http.routers.rabbitgather-article-restful.entrypoints=https"
-#    container_name: rabbitgather-article
-#    build:
-#      context: modules/article
-#    environment:
-#      DEBUG: "true"
-#    volumes:
-#      - ./modules/article/config/config_docker.json:/app/config/config.json
-#    depends_on:
-#      - traefik
-#      - neo4jdb
-#      - mariadb
-#      - redisdb
-#
-#
-#  mariadb:
-#    networks:
-#      - internal
-#    container_name: rabbitgather-mariadb
-#    build: ./mariadb
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - ./mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
-#      - ./mariadb/datadir:/var/lib/mysql
-#      - ./mariadb/initdb:/docker-entrypoint-initdb.d
-#    environment:
-#      MYSQL_ROOT_PASSWORD: 1234
-#    restart: always
-#
-#
-#  neo4jdb:
-#    networks:
-#      - internal
-#    container_name: rabbitgather-neo4jdb
-#    image: neo4j:4.3.3-community
-#    ports:
-#      - "7687:7687"
-#    volumes:
-#      - ./neo4j/data:/data
-#      - ./neo4j/logs:/logs
-#      - ./neo4j/import:/var/lib/neo4j/import
-#      - ./neo4j/plugins:/plugins
-#    environment:
-#      NEO4J_AUTH: neo4j/1234
-#    restart: always
-#
-#  redisdb:
-#    networks:
-#      - internal
-#    image: redis:6.2.5
-#    #    不知為啥就是無法自己讀取，只能手動設定
-#    command: 'redis-server /usr/local/etc/redis/redis.conf'
-#    ports:
-#      - '6379:6379'
-#    volumes:
-#      - ./redis/data:/data
-#      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-##    environment:
-##      REDIS_PASSWORD: 1234
+      - "traefik.http.routers.rabbitgather-core.rule=Host(`rabbit_gather_api.meowalien.com`)"
+      - "traefik.http.routers.rabbitgather-core.tls=true"
+      - "traefik.http.routers.rabbitgather-core.entrypoints=https"

@@ -3,4 +3,3 @@ CREATE USER 'core'@'%' IDENTIFIED BY '5678';
 GRANT ALL ON core.* TO 'core'@'%';
 FLUSH PRIVILEGES;
 
-use `core`;

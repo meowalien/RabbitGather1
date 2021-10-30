@@ -1,1 +1,5 @@
-.idea
+api/core/log
+mariadb/datadir
+redis/data
+traefik/ssl/
+try
