@@ -3,3 +3,4 @@ mariadb/datadir
 redis/data
 traefik/ssl/
 try
+api/core/config/*
