@@ -2,14 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/go-util" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/lib/go-util" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/modules/article" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/modules/lib" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/services/article" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/services/lib" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/services/rabbitgather-lib" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/services/web/view/rabbitgather-frontend-web" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/util" vcs="Git" />
   </component>
 </project>

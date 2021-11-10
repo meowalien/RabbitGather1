@@ -70,22 +70,14 @@ func (b *broker) Start() {
 			}
 			return
 		case msgCh := <-b.subscribeChan:
-			//pretty.Println("subscribeChan subs -- before: ", subs)
 			subs[msgCh] = struct{}{}
-			//pretty.Println("subscribeChan subs -- after: ", subs)
 		case msgCh := <-b.unSubscribeChan:
-			//pretty.Println("UNSubscribeChan subs -- before: ",subs)
 			delete(subs, msgCh)
-			//pretty.Println("UNSubscribeChan subs -- after: ",subs)
 		case m := <-b.publishChan:
 			msg := m[0]
 			allExcept := m[1].([]*BrokerClient)
-
-			//pretty.Println("len(subs): ",len(subs))
-
 			for msgCh := range subs {
 				doTransfer := func(bk *BrokerClient) {
-					//pretty.Println("bk: ",bk)
 					if allExcept != nil {
 						for _, exceptMsgCh := range allExcept {
 							if exceptMsgCh == bk {
@@ -97,9 +89,6 @@ func (b *broker) Start() {
 						if !b.isActive {
 							return
 						}
-						//fmt.Println("send : ",bk)
-
-						// msgCh is buffered, use non-blocking send to protect the broker:
 						select {
 						case bk.C <- msg:
 						default:
@@ -107,10 +96,8 @@ func (b *broker) Start() {
 					}
 				}
 				threadLimiter <- struct{}{}
-				//go func(msgCh *BrokerClient) {
 				doTransfer(msgCh)
 				<-threadLimiter
-				//}(msgCh)
 			}
 		}
 	}
