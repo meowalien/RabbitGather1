@@ -2,7 +2,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build --outDir ./dist",
+    "build": "vue-tsc --noEmit && vite build --outDir ../../web/official_page",
     "serve": "vite preview"
   },
   "dependencies": {
@@ -10,11 +10,13 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@types/vue-router": "^2.0.0",
     "@vitejs/plugin-vue": "^1.2.3",
     "@vue/compiler-sfc": "3.1.5",
     "typescript": "^4.3.2",
+    "vitawind": "^1.2.7",
     "vite": "^2.4.4",
-    "vue-tsc": "^0.0.24",
-    "vitawind": "^1.2.7"
+    "vue-router": "^4.0.12",
+    "vue-tsc": "^0.0.24"
   }
 }
