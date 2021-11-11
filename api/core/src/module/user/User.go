@@ -263,6 +263,7 @@ func (u *user) UUID() string {
 func (u *user) UserClaim() map[string]interface{} {
 	return map[string]interface{}{
 		"user_uuid": u.uuid,
+		"roles":u.roles,
 	}
 }
 func (u *user) CleanUserOwnToken() error {
@@ -285,6 +286,7 @@ type user struct {
 	id     uint64
 	uuid   string
 	ustype string
+	roles  []string
 }
 
 func (u *user) Frozen() (exist bool, err error) {

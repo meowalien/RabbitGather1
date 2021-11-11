@@ -24,7 +24,6 @@ func savePublicKey(tokenID string, key string) error {
 }
 
 // return stringtoken , publickey , err
-// 若無standardclaim 會自動補齊
 func NewTokenWithClaims(cls ...map[string]interface{}) (tk string, err error) {
 	if cls == nil {
 		return "", errs.WithLine(fmt.Errorf("empty claim"))

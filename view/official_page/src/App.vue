@@ -1,17 +1,16 @@
 <template>
-  <router-view class="h-full" />
+  <router-view />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
-import Try from './components/ForTest.vue'
+// import Home from '@view/Home.vue'
+import Try from '@/components/ForTest.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
-    Try,
-    HelloWorld
+    // Home
   }
 })
 </script>

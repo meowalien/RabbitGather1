@@ -4,3 +4,4 @@ redis/data
 traefik/ssl/
 try
 api/core/config/*
+view/official_page - 2021.11.11 穩定/*

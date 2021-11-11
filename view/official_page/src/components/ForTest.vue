@@ -1,10 +1,10 @@
 <template>
-fdfsdfsdfdsfdsfd88888888888sfd
+<div>fdsfdklfjsdlk</div>
 </template>
 
 <script>
 // in a vue component
-import { useStore } from '../store'
+import { useStore } from "@/store"
 
 export default {
   setup () {
