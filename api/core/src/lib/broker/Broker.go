@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"core/src/lib/uuid"
 	"fmt"
 	"log"
 )
@@ -65,19 +66,26 @@ func (b *broker) Start() {
 			for msgCh := range subs {
 				err := msgCh.Close()
 				if err != nil {
-					fmt.Printf("error when close %s BrokerClient: %s\n", msgCh.Name, err.Error())
+					fmt.Printf("error when close %s BrokerClient: %s\n", msgCh.UUID, err.Error())
 				}
 			}
 			return
 		case msgCh := <-b.subscribeChan:
+			//pretty.Println("subscribeChan subs -- before: ", subs)
 			subs[msgCh] = struct{}{}
+			//pretty.Println("subscribeChan subs -- after: ", subs)
 		case msgCh := <-b.unSubscribeChan:
 			delete(subs, msgCh)
+			//pretty.Println("UNSubscribeChan subs -- after: ",subs)
 		case m := <-b.publishChan:
 			msg := m[0]
 			allExcept := m[1].([]*BrokerClient)
+
+			//pretty.Println("len(subs): ",len(subs))
+
 			for msgCh := range subs {
 				doTransfer := func(bk *BrokerClient) {
+					//pretty.Println("bk: ",bk)
 					if allExcept != nil {
 						for _, exceptMsgCh := range allExcept {
 							if exceptMsgCh == bk {
@@ -89,6 +97,9 @@ func (b *broker) Start() {
 						if !b.isActive {
 							return
 						}
+						//fmt.Println("send : ",bk)
+
+						// msgCh is buffered, use non-blocking send to protect the broker:
 						select {
 						case bk.C <- msg:
 						default:
@@ -96,8 +107,10 @@ func (b *broker) Start() {
 					}
 				}
 				threadLimiter <- struct{}{}
+				//go func(msgCh *BrokerClient) {
 				doTransfer(msgCh)
 				<-threadLimiter
+				//}(msgCh)
 			}
 		}
 	}
@@ -109,18 +122,23 @@ func (b *broker) Stop() {
 	close(b.stopCh)
 }
 
+func GetUUID() string {
+	return uuid.NewUUID("B")
+}
+
 // Subscribe will create a new BrokerClient which Listen on new published message
-func (b *broker) Subscribe(name string, filter Filter) *BrokerClient {
+func (b *broker) Subscribe(filter Filter) *BrokerClient {
 	if !b.isActive {
 		panic("the broker is not active, please start it up.")
 	}
-	msgCh := &BrokerClient{C: make(chan interface{}, b.clientQueueSize), Filter: filter, Name: name}
+	msgCh := &BrokerClient{C: make(chan interface{}, b.clientQueueSize), Filter: filter, UUID: GetUUID()}
 	b.subscribeChan <- msgCh
 	return msgCh
 }
 
 // Unsubscribe will make broker stop sending new message to the given BrokerClient cnd close the C channel.
 func (b *broker) Unsubscribe(msgCh *BrokerClient) {
+	//pretty.Println("Unsubscribe BrokerClient: ",msgCh)
 	if !b.isActive {
 		panic("the broker is not active, please start it up.")
 	}
@@ -147,7 +165,7 @@ type BrokerClient struct {
 	// New messages will be received through C
 	C      chan interface{}
 	Filter Filter
-	Name   string
+	UUID   string
 }
 
 func (b *BrokerClient) Close() error {

@@ -1,10 +1,14 @@
-import { createWebHistory, createRouter } from "vue-router";
-import Home from "../view/Home.vue"
-const routes = [
+import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
+// import Login from "../view/Login.vue"
+
+const routes: Array<RouteRecordRaw> = [
     {
         path: "/",
-        name: "Home",
-        component: Home,
+        name: "Login",
+        component:() => import('../view/Login.vue'),// Login,
+        meta: {
+            roles: ['admin'],
+        }
     },
 ];
 

@@ -4,9 +4,9 @@ import (
 	"context"
 	"core/src/lib/decode_encode"
 	"core/src/lib/errs"
+	"core/src/module/code"
 	"core/src/module/files"
 	"core/src/module/permission"
-	"core/src/module/response"
 	"core/src/module/token"
 	"core/src/module/user"
 	"core/src/module/vc_code"
@@ -42,44 +42,49 @@ func (h *HTTP) login(c *gin.Context) {
 	}
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		response.StatusMissingParameters.JsonResponse(c, err)
+		code.StatusMissingParameters.JsonResponse(c, err)
 		return
 	}
+	fmt.Println("apapapapa")
 
 	us, exist, err := user.GetUserByAccount(req.Username)
 	if err != nil {
-		response.ServerError.JsonResponse(c, err)
+		code.ServerError.JsonResponse(c, err)
 		return
 	}
 	if !exist {
-		response.StatusAccountNotFound.JsonResponse(c)
+		code.StatusAccountNotFound.JsonResponse(c)
 		return
 	}
+	fmt.Println("apapapapa")
 
 	if yes, e := us.Frozen(); e != nil {
-		response.ServerError.JsonResponse(c, e)
+		code.ServerError.JsonResponse(c, e)
 	} else if yes {
-		response.StatusAccountFrozen.JsonResponse(c)
+		code.StatusAccountFrozen.JsonResponse(c)
 		return
 	}
+	fmt.Println("apapapapa")
 
 	passOK, err := us.CheckPassword(req.Password)
 	if err != nil {
-		response.ServerError.JsonResponse(c, err)
+		code.ServerError.JsonResponse(c, err)
 		return
 	}
 	if !passOK {
-		response.StatusPasswordWrong.JsonResponse(c)
+		code.StatusPasswordWrong.JsonResponse(c)
 		return
 	}
+	fmt.Println("apapapapa")
 
 	newAPIToken, refreshToken, err := h.reCreateToken(us)
 	if err != nil {
-		response.ServerError.JsonResponse(c)
+		code.ServerError.JsonResponse(c)
 		return
 	}
+	fmt.Println("apapapapa")
 
-	response.OK.JsonResponse(c, Response{
+	code.OK.JsonResponse(c, Response{
 		UUID:         us.UUID(),
 		Token:        newAPIToken,
 		RefreshToken: refreshToken,
@@ -112,26 +117,26 @@ func (h HTTP) signup(c *gin.Context) {
 	}
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		response.StatusMissingParameters.JsonResponse(c, err)
+		code.StatusMissingParameters.JsonResponse(c, err)
 		return
 	}
 
 	_, exist, err := user.GetUserByAccount(req.Account)
 	if err != nil {
-		response.ServerError.JsonResponse(c,err)
+		code.ServerError.JsonResponse(c,err)
 		return
 	}
 	if exist{
-		response.StatusAccountAlreadyExist.JsonResponse(c,"account duplicate")
+		code.StatusAccountAlreadyExist.JsonResponse(c,"account duplicate")
 		return
 	}
 	_, exist, err = user.GetUserByEmail(req.Email)
 	if err != nil {
-		response.ServerError.JsonResponse(c,err)
+		code.ServerError.JsonResponse(c,err)
 		return
 	}
 	if exist{
-		response.StatusAccountAlreadyExist.JsonResponse(c,"email duplicate")
+		code.StatusAccountAlreadyExist.JsonResponse(c,"email duplicate")
 		return
 	}
 
@@ -142,16 +147,16 @@ func (h HTTP) signup(c *gin.Context) {
 	case vc_code.EmailKey:
 		vcKey = req.Email
 	default:
-		response.StatusWrongInput.JsonResponse(c, fmt.Sprintf("not supported vc_type: %s", req.VCType))
+		code.StatusWrongInput.JsonResponse(c, fmt.Sprintf("not supported vc_type: %s", req.VCType))
 	}
 
 	ok, err := vc_code.CheckVCCode(req.VCType, vcKey, req.VCCode)
 	if err != nil {
-		response.ServerError.JsonResponse(c, err)
+		code.ServerError.JsonResponse(c, err)
 		return
 	}
 	if !ok {
-		response.StatusVerificationCodeWrong.JsonResponse(c)
+		code.StatusVerificationCodeWrong.JsonResponse(c)
 		return
 	}
 
@@ -159,7 +164,7 @@ func (h HTTP) signup(c *gin.Context) {
 	case string(user.PlainUserType):
 
 	default:
-		response.StatusWrongInput.JsonResponse(c, "not supported user type")
+		code.StatusWrongInput.JsonResponse(c, "not supported user type")
 		return
 	}
 	fileURL := ""
@@ -167,7 +172,7 @@ func (h HTTP) signup(c *gin.Context) {
 		var bytes []byte
 		bytes, err = decode_encode.DecodeBase64ToBytes(req.Photo.FileBase64)
 		if err != nil {
-			response.ServerError.JsonResponse(c, err)
+			code.ServerError.JsonResponse(c, err)
 			return
 		}
 
@@ -176,7 +181,7 @@ func (h HTTP) signup(c *gin.Context) {
 			ExtensionName: req.Photo.ExtensionName,
 		})
 		if err != nil {
-			response.ServerError.JsonResponse(c, err)
+			code.ServerError.JsonResponse(c, err)
 			return
 		}
 	}
@@ -193,16 +198,11 @@ func (h HTTP) signup(c *gin.Context) {
 		Password: req.Password,
 	})
 	if err != nil {
-		response.ServerError.JsonResponse(c, err)
+		code.ServerError.JsonResponse(c, err)
 		return
 	}
 
-	//newAPIToken, refreshToken, err := h.reCreateToken(us)
-	//if err != nil {
-	//	response.ServerError.JsonResponse(c)
-	//	return
-	//}
-	response.StatusNoContent.JsonResponse(c)
+	code.NoContent.JsonResponse(c)
 }
 
 // 刷新重新頒發token
@@ -260,7 +260,7 @@ func (h HTTP) sendVerificationCode(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		response.StatusMissingParameters.JsonResponse(c, err)
+		code.StatusMissingParameters.JsonResponse(c, err)
 		return
 	}
 
@@ -270,24 +270,24 @@ func (h HTTP) sendVerificationCode(c *gin.Context) {
 	case vc_code.EmailKey:
 		recipient = req.Email
 		if req.Email == "" {
-			response.StatusMissingParameters.JsonResponse(c, "email is empty")
+			code.StatusMissingParameters.JsonResponse(c, "email is empty")
 			return
 		}
 		vc, err = vc_code.SendEmailVCCode(req.Email)
 		if err != nil {
-			response.ServerError.JsonResponse(c, err)
+			code.ServerError.JsonResponse(c, err)
 			return
 		}
 		fmt.Println("vc: ", vc)
 	default:
-		response.StatusWrongInput.JsonResponse(c, fmt.Sprintf("not supported vc_type:%s", req.VCType))
+		code.StatusWrongInput.JsonResponse(c, fmt.Sprintf("not supported vc_type:%s", req.VCType))
 		return
 	}
 	err = vc_code.SaveVCCode(req.VCType, recipient, vc)
 	if err != nil {
-		response.ServerError.JsonResponse(c, err)
+		code.ServerError.JsonResponse(c, err)
 		return
 	}
 
-	response.StatusNoContent.JsonResponse(c)
+	code.NoContent.JsonResponse(c)
 }

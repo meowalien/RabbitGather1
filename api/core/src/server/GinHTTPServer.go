@@ -15,60 +15,42 @@ import (
 func CrossHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method
-		//origin := c.Request.Header.Get("Origin")
-		//if origin == "" {
-		//	c.AbortWithStatus(http.StatusForbidden)
-		//}
-		//ok := CheckOrigin(origin)
-		//if !ok {
-		//	c.AbortWithStatus(http.StatusForbidden)
-		//	return
-		//}
-
-		//接收客戶端傳送的origin
-		c.Writer.Header().Set("Access-Control-Allow-Origin", allowOrigin)
-		//伺服器支援的所有跨域請求的方法
-		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
-		//允許跨域設定可以返回其他子段，可以自定義欄位
-		//c.Header("Access-Control-Allow-Headers", "Authorization, Content-Length, X-CSRF-Token, Token,session, "+
-		//	"X_Requested_With,Accept, Origin, Host, Connection, Accept-Encoding, Accept-Language,DNT, "+
-		//	"X-CustomHeader, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, "+
-		//	"Content-Type, Pragma, token, openid, opentoken, Authentication-Token")
-		c.Header("Access-Control-Allow-Headers", allowHeaders)
-		//允許瀏覽器(客戶端)可以解析的頭部 (重要)
-		c.Header("Access-Control-Expose-Headers", exposeHeaders)
-		//c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, "+
-		//	"Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type, "+
-		//	"Expires, Last-Modified, Pragma, FooBar")
-		//設定快取時間
-		c.Header("Access-Control-Max-Age", "86400")
-		//允許客戶端傳遞校驗資訊比如 cookie (重要)
-		c.Header("Access-Control-Allow-Credentials", "false")
-
+		origin := c.Request.Header.Get("Origin")
+		if origin != "" {
+			// todo:origin 檢查
+			//接收客戶端傳送的origin
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			//伺服器支援的所有跨域請求的方法
+			c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
+			//允許跨域設定可以返回其他子段，可以自定義欄位
+			c.Header("Access-Control-Allow-Headers", allowHeaders)
+			//允許瀏覽器(客戶端)可以解析的頭部 (重要)
+			c.Header("Access-Control-Expose-Headers", exposeHeaders)
+			//設定快取時間
+			c.Header("Access-Control-Max-Age", "86400")
+			//允許客戶端傳遞校驗資訊比如 cookie (重要)
+			c.Header("Access-Control-Allow-Credentials", "false")
+		}
 		//允許型別校驗
 		if method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusOK)
-			//c.JSON(http.StatusOK, "ok!")
 		}
-
 		c.Next()
 	}
 }
 
-var allowOrigin string
 
-func init() {
-	allowOrigin = strings.Join(conf.GlobalConfig.Server.AllowOrigin, ",")
-}
 var allowHeaders string
 
+func init() {
+	allowHeaders = strings.Join(conf.GlobalConfig.Server.AllowHeaders, ",")
+}
 
 var exposeHeaders string
 
 func init() {
 	exposeHeaders = strings.Join(conf.GlobalConfig.Server.ExposeHeaders, ",")
 }
-
 
 func InitGinHTTPServer(ctx context.Context, registers ...service.GinServerRegister) *GinHTTPServer {
 	server := GinHTTPServer{

@@ -6,7 +6,6 @@ services:
     image: traefik:v2.0
     ports:
       - "443:443"
-    #      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik/dynamic.yaml:/dynamic.yaml
@@ -75,3 +74,7 @@ services:
       - "traefik.http.routers.rabbitgather-core.rule=Host(`rabbit_gather_api.meowalien.com`)"
       - "traefik.http.routers.rabbitgather-core.tls=true"
       - "traefik.http.routers.rabbitgather-core.entrypoints=https"
+    depends_on:
+      - redisdb
+      - mariadb
+      - traefik

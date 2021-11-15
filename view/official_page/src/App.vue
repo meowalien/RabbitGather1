@@ -17,6 +17,6 @@ export default defineComponent({
 
 <style lang="postcss">
   #app {
-    @apply text-center
+    @apply text-center font-mono
   }
 </style>
