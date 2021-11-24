@@ -7,3 +7,4 @@ try
 api/core/config/*
 view/official_page - 2021.11.11 穩定/*
 view/official_page/assets
+.idea
