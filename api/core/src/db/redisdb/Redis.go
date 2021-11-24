@@ -19,7 +19,7 @@ func InitRedis() {
 }
 
 const Split =":"
-const ProjectName = "core"
+var ProjectName = conf.GlobalConfig.ProjectName
 
 // 格式化redis key
 func FormatKey(keys ...string) string {

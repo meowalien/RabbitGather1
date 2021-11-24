@@ -2,9 +2,9 @@ package init
 
 import (
 	"core/src/conf"
+	"core/src/db/mariadb"
+	"core/src/db/redisdb"
 	"core/src/lib/config"
-	"core/src/module/db/mariadb"
-	"core/src/module/db/redisdb"
 	"core/src/module/log"
 	"core/src/module/permission"
 	"flag"

@@ -14,7 +14,7 @@ drop table if exists currency;
 
 drop table if exists joy_games_baccarat_order_transfer_order_map;
 drop table if exists joy_games_baccarat_round_order_map;
-
+drop table if exists project_card_list;
 
 
 
@@ -78,8 +78,8 @@ CREATE TABLE `user_info`
     `nick_name` varchar(128)        not null comment '暱稱(一開始與帳號一樣)',
     `gender`    tinyint(1)          not null comment '性別(女0男1不透露3)',
     `email`     varchar(255)        not null,
-    `phone`     varchar(255) default '',
-    `photo_url`  VARCHAR(2083) default '',
+    `phone`     varchar(255)  default '',
+    `photo_url` VARCHAR(2083) default '',
     foreign key (`user_id`) references user (`id`),
     unique (`email`)
 ) auto_increment = 10000
@@ -101,4 +101,38 @@ CREATE TABLE `user_role`
     DEFAULT CHARSET = utf8mb4;
 
 
+
+# 需做存讀取暫存
+create table `project_card_list`
+(
+    `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `title`      varchar(1024)       not null comment '標題',
+    `summary`    varchar(1024)       not null comment '簡介',
+    `content_url` VARCHAR(2083) not null  comment '內容網址',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment '創建時間',
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment '更新時間',
+    `deleted_at` TIMESTAMP DEFAULT 0 comment '刪除時間',
+    PRIMARY KEY (`id`),
+    KEY (`created_at`),
+    KEY (`updated_at`),
+    KEY (`deleted_at`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4;
+
+
+
 insert into role (name) value ('login');
+
+insert into project_card_list (title, summary, content_url) value ( concat('title' , LAST_INSERT_ID()+1) , concat('summary' ,LAST_INSERT_ID()+1) ,concat('content_url' , LAST_INSERT_ID()+1) );
+insert into project_card_list (title, summary, content_url) value ( concat('title' , LAST_INSERT_ID()+1) , concat('summary' ,LAST_INSERT_ID()+1) ,concat('content_url' , LAST_INSERT_ID()+1) );
+insert into project_card_list (title, summary, content_url) value ( concat('title' , LAST_INSERT_ID()+1) , concat('summary' ,LAST_INSERT_ID()+1) ,concat('content_url' , LAST_INSERT_ID()+1) );
+insert into project_card_list (title, summary, content_url) value ( concat('title' , LAST_INSERT_ID()+1) , concat('summary' ,LAST_INSERT_ID()+1) ,concat('content_url' , LAST_INSERT_ID()+1) );
+insert into project_card_list (title, summary, content_url) value ( concat('title' , LAST_INSERT_ID()+1) , concat('summary' ,LAST_INSERT_ID()+1) ,concat('content_url' , LAST_INSERT_ID()+1) );
+insert into project_card_list (title, summary, content_url) value ( concat('title' , LAST_INSERT_ID()+1) , concat('summary' ,LAST_INSERT_ID()+1) ,concat('content_url' , LAST_INSERT_ID()+1) );
+insert into project_card_list (title, summary, content_url) value ( concat('title' , LAST_INSERT_ID()+1) , concat('summary' ,LAST_INSERT_ID()+1) ,concat('content_url' , LAST_INSERT_ID()+1) );
+insert into project_card_list (title, summary, content_url) value ( concat('title' , LAST_INSERT_ID()+1) , concat('summary' ,LAST_INSERT_ID()+1) ,concat('content_url' , LAST_INSERT_ID()+1) );
+
+select * from project_card_list;
+
+

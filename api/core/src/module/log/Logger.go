@@ -11,12 +11,13 @@ import (
 
 var Logger *MyLog
 
+
 type MyLog struct {
 	*zap.SugaredLogger
 }
 
-func (m *MyLog)Skip(deap int ) *MyLog{
-	return &MyLog{SugaredLogger:m.SugaredLogger.Desugar().WithOptions(zap.AddCallerSkip(deap)).Sugar()}
+func (m *MyLog) Skip(deap int) *MyLog {
+	return &MyLog{SugaredLogger: m.SugaredLogger.Desugar().WithOptions(zap.AddCallerSkip(deap)).Sugar()}
 }
 
 func InitLogger() {
@@ -63,7 +64,7 @@ func NewLogger(level zapcore.Level) *zap.SugaredLogger {
 	redisCore := zapcore.NewCore(jsonEnc, zapcore.Lock(syncer), levelEnabler)
 
 	// 集成多個 core
-	core := zapcore.NewTee(redisCore,stdCore) //stdCore
+	core := zapcore.NewTee(redisCore, stdCore) //stdCore
 
 	// logger 輸出到 console 且標識調用代碼行
 	return zap.New(core).WithOptions(zap.AddCaller()).Sugar()

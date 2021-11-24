@@ -3,9 +3,9 @@ package token
 import (
 	"context"
 	"core/src/conf"
+	"core/src/db/redisdb"
 	"core/src/lib/errs"
 	"core/src/lib/uuid"
-	"core/src/module/db/redisdb"
 	"core/src/module/log"
 	"crypto/rand"
 	"crypto/rsa"

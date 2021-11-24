@@ -7,24 +7,45 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 type StatusCode interface {
+	error
 	String() string
-	Response(c *gin.Context,resp func(d StatusCode, c *gin.Context, data ...interface{}), data ...interface{})
-	JsonResponse(c *gin.Context, data ...interface{})
+	ResponseAsStruct(c *gin.Context, resp func(d StatusCode, c *gin.Context, data ...interface{}), data ...interface{})
 	HTTPCode() int
 	MyCode() int
+}
+
+// 紀錄錯誤或信息發生地點
+type LogPlace interface {
+	LogPlace(s ...interface{}) StatusCode
+}
+
+type FlatJsonResponse interface {
 	FlatJsonResponse(c *gin.Context, data ...interface{})
 }
+
+type JsonResponse interface {
+	JsonResponse(c *gin.Context, data ...interface{})
+}
+
 type httpStatusCode int
 
-func (d httpStatusCode) Response(c *gin.Context,resp func(d StatusCode, c *gin.Context, data ...interface{}), data ...interface{}) {
+func (m httpStatusCode) Error() string {
+	return m.String()
+}
+
+func (m httpStatusCode) LogPlace(s ...interface{}) StatusCode {
+	return logPlace(m, s)
+}
+func (d httpStatusCode) ResponseAsStruct(c *gin.Context,resp func(d StatusCode, c *gin.Context, data ...interface{}), data ...interface{}) {
 	resp(d,c, data...)
 }
 func (d httpStatusCode) JsonResponse(c *gin.Context, data ...interface{}) {
-	d.Response(c ,JsonResponseWrapper(StandardJsonResponse) , data... )
+	d.ResponseAsStruct(c , JsonResponseWrapper(StandardJsonResponse) , data... )
 }
 func (d httpStatusCode) FlatJsonResponse(c *gin.Context, data ...interface{}) {
-	d.Response(c,MapJsonResponseWrapper(standardFlatJsonResponse),data...)
+	d.ResponseAsStruct(c, MapJsonResponseWrapper(standardFlatJsonResponse),data...)
 }
 func (d httpStatusCode) String() string {
 	code, exist := statusText[d]
@@ -43,12 +64,39 @@ func (d httpStatusCode) MyCode() int {
 
 type myStatusCode httpStatusCode
 
-func (m myStatusCode) Response(c *gin.Context, resp func(d StatusCode, c *gin.Context, data ...interface{}), data ...interface{}) {
-	resp(m,c, data...)
+func (m myStatusCode) Error() string {
+	return m.String()
 }
 
+func (m myStatusCode) ResponseAsStruct(c *gin.Context, resp func(d StatusCode, c *gin.Context, data ...interface{}), data ...interface{}) {
+	resp(m,c, data...)
+}
+func (m myStatusCode) LogPlace(s ...interface{}) StatusCode {
+	return logPlace(m, s)
+}
+
+func logPlace(m StatusCode, s []interface{}) StatusCode{
+	deap := 2
+	if s == nil || len(s) == 0{
+		log.Logger.Skip(deap).Debug(m.String())
+		return m
+	}
+	for _, i2 := range s {
+		switch ss := i2.(type) {
+		case string:
+			log.Logger.Skip(deap).Debug(ss)
+		case error:
+			log.Logger.Skip(deap).Error(ss)
+		default:
+			log.Logger.Skip(deap).Debugf("%v",ss)
+		}
+	}
+	return m
+}
+
+
 func (m myStatusCode) FlatJsonResponse(c *gin.Context, data ...interface{}) {
-	m.Response(c,MapJsonResponseWrapper(standardFlatJsonResponse),data...)
+	m.ResponseAsStruct(c, MapJsonResponseWrapper(standardFlatJsonResponse),data...)
 }
 
 func (m myStatusCode) String() string {
@@ -60,7 +108,7 @@ func (m myStatusCode) String() string {
 }
 
 func (m myStatusCode) JsonResponse(c *gin.Context, data ...interface{}) {
-	m.Response(c ,JsonResponseWrapper(StandardJsonResponse) , data... )
+	m.ResponseAsStruct(c , JsonResponseWrapper(StandardJsonResponse) , data... )
 }
 
 func (m myStatusCode) HTTPCode() int {
@@ -73,6 +121,7 @@ func (m myStatusCode) MyCode() int {
 
 
 func JsonResponseWrapper(resp  func (c *gin.Context, statusCode int, myCode int, msg string, data interface{})) func(d StatusCode, c *gin.Context, data ...interface{}){
+	deap := 3
 	return func(d StatusCode, c *gin.Context, data ...interface{}) {
 		if data == nil || len(data) == 0 {
 			st := d.String()
@@ -105,7 +154,7 @@ func JsonResponseWrapper(resp  func (c *gin.Context, statusCode int, myCode int,
 				} else {
 					msg = d.String()
 				}
-				log.Logger.Skip(2).Error(t.Error())
+				log.Logger.Skip(deap).Error(t.Error())
 			default:
 				// 非信息型態，作為資料處理
 				msg = d.String()
@@ -125,10 +174,10 @@ func JsonResponseWrapper(resp  func (c *gin.Context, statusCode int, myCode int,
 				} else {
 					msg = d.String()
 				}
-				log.Logger.Skip(2).Error(t.Error())
+				log.Logger.Skip(deap).Error(t.Error())
 			case nil:
 				msg = d.String()
-				log.Logger.Skip(2).Error("got nil on first parameter ")
+				log.Logger.Skip(deap).Error("got nil on first parameter ")
 			default:
 				panic("the first must be msg( string type)")
 			}
@@ -158,6 +207,7 @@ func StandardJsonResponse(c *gin.Context, statusCode int, myCode int, msg string
 
 
 func MapJsonResponseWrapper(resp  func (c *gin.Context, statusCode int, myCode int, msg string, data interface{})) func(d StatusCode, c *gin.Context, data ...interface{}) {
+	deap := 3
 	return func(d StatusCode, c *gin.Context, data ...interface{}) {
 		if data == nil || len(data) == 0 {
 			st := d.String()
@@ -190,13 +240,13 @@ func MapJsonResponseWrapper(resp  func (c *gin.Context, statusCode int, myCode i
 				} else {
 					msg = d.String()
 				}
-				log.Logger.Skip(2).Error(t.Error())
+				log.Logger.Skip(deap).Error(t.Error())
 			case map[string]interface{}:
 				msg = d.String()
 				i = t
 			case nil:
 				msg = d.String()
-				log.Logger.Skip(2).Error("got nil on first parameter ")
+				log.Logger.Skip(deap).Error("got nil on first parameter ")
 
 			default:
 				panic(fmt.Sprintf("not supported type:%v", t))
@@ -215,7 +265,7 @@ func MapJsonResponseWrapper(resp  func (c *gin.Context, statusCode int, myCode i
 				} else {
 					msg = d.String()
 				}
-				log.Logger.Skip(2).Error(t.Error())
+				log.Logger.Skip(deap).Error(t.Error())
 			default:
 				panic("the first must be msg( string type)")
 			}
@@ -400,7 +450,7 @@ const (
 )
 
 const (
-	StatusMissingParameters     = myStatusCode(BadRequest*StatusCodeMagnification )+ 1 + iota
+	StatusMissingParameters     = myStatusCode(BadRequest*StatusCodeMagnification)+ 1 + iota
 	MissingInputValue
 	StatusVerificationCodeWrong
 	StatusWalletBalanceOverflow

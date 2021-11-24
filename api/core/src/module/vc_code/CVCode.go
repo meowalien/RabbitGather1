@@ -3,10 +3,10 @@ package vc_code
 import (
 	"context"
 	"core/src/conf"
+	"core/src/db/redisdb"
 	"core/src/lib/errs"
 	"core/src/lib/mail"
 	"core/src/lib/random"
-	"core/src/module/db/redisdb"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"time"

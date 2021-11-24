@@ -23,9 +23,10 @@
 import { ref, defineComponent } from "vue";
 import axios from "axios";
 import {StoreKey } from "@/store"
+import {NotErrCode, Panic, StdResponse} from "@/module/ErrorHandler";
 
 export default defineComponent({
-  name: "Home",
+  name: "Login",
   props: {
   },
   setup: () => {
@@ -35,28 +36,24 @@ export default defineComponent({
   },
   methods :{
     async sendLogin (account:string , password:string ){
-      console.log("account: ",account)
-      console.log("password: ",password)
+      console.debug("account: ",account)
+      console.debug("password: ",password)
 
 
       let d = new URL( "/member/login",this.$store.state.api_base_url);
 
-
-      console.log("before_refresh_token: ",this.$store.state.refresh_token)
-      console.log("before_app_token: ",this.$store.state.app_token)
-
       await axios.post(d.toString(),{
         "account":account,
         "password":password
-      }).then(value => {
-        this.$store.commit(StoreKey.app_token,value.data.data.token)
-        this.$store.commit(StoreKey.refresh_token,value.data.data.refresh_token)
+      }).then(res => {
+        if (!NotErrCode(res.data as StdResponse)) {
+          return
+        }
+        this.$store.commit(StoreKey.app_token,res.data.data.token)
+        this.$store.commit(StoreKey.refresh_token,res.data.data.refresh_token)
       }).catch(reason => {
-        console.log("reason: ",reason)
+        Panic(reason)
       })
-      console.log("after_refresh_token: ",this.$store.state.refresh_token)
-      console.log("after_app_token: ",this.$store.state.app_token)
-
     }
   }
 });

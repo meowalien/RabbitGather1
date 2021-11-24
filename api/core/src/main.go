@@ -1,11 +1,11 @@
 package main
 
 import (
+	"core/src/db/mariadb"
+	"core/src/db/redisdb"
 	_ "core/src/init"
 
 	"context"
-	"core/src/module/db/mariadb"
-	"core/src/module/db/redisdb"
 	"core/src/module/log"
 	"core/src/server"
 	"core/src/service/member"

@@ -3,9 +3,17 @@ import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
     {
-        path: "/",
+        path: "/login",
         name: "Login",
         component:() => import('../view/Login.vue'),// Login,
+        meta: {
+            roles: ['admin'],
+        }
+    },
+    {
+        path: "/",
+        name: "Home",
+        component:() => import('../view/Home.vue'),// Login,
         meta: {
             roles: ['admin'],
         }

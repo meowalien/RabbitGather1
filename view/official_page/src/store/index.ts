@@ -39,11 +39,11 @@ export const store = createStore<State>({
     state: mystate,
     mutations: {
         [StoreKey.refresh_token](state: any, new_refresh_token: string) {
-            console.log("new_refresh_token: ", new_refresh_token)
+            console.debug("new_refresh_token: ", new_refresh_token)
             state.refresh_token = new_refresh_token
         },
         [StoreKey.app_token](state: any, newToken: string) {
-            console.log("newToken: ", newToken)
+            console.debug("newToken: ", newToken)
             state.app_token = newToken
         }
     }

@@ -2,9 +2,9 @@ package member
 
 import (
 	"context"
+	"core/src/code"
 	"core/src/lib/decode_encode"
 	"core/src/lib/errs"
-	"core/src/module/code"
 	"core/src/module/files"
 	"core/src/module/permission"
 	"core/src/module/token"
@@ -17,14 +17,14 @@ import (
 type HTTP struct {
 }
 
-func (m *HTTP) Mount(ctx context.Context, engine *gin.Engine) error {
+func (h *HTTP) Mount(ctx context.Context, engine *gin.Engine) error {
 	router := engine.Group("/member")
 	// 新建用戶
-	router.POST("/signup", m.signup)
+	router.POST("/signup", h.signup)
 	// 豋入
-	router.POST("/login", m.login)
+	router.POST("/login", h.login)
 	// 發送驗證碼
-	router.POST("/send_vc", m.sendVerificationCode)
+	router.POST("/send_vc", h.sendVerificationCode)
 
 	return nil
 }
@@ -45,7 +45,7 @@ func (h *HTTP) login(c *gin.Context) {
 		code.StatusMissingParameters.JsonResponse(c, err)
 		return
 	}
-	fmt.Println("apapapapa")
+	//fmt.Println("apapapapa")
 
 	us, exist, err := user.GetUserByAccount(req.Username)
 	if err != nil {
@@ -56,7 +56,7 @@ func (h *HTTP) login(c *gin.Context) {
 		code.StatusAccountNotFound.JsonResponse(c)
 		return
 	}
-	fmt.Println("apapapapa")
+	//fmt.Println("apapapapa")
 
 	if yes, e := us.Frozen(); e != nil {
 		code.ServerError.JsonResponse(c, e)
@@ -64,7 +64,7 @@ func (h *HTTP) login(c *gin.Context) {
 		code.StatusAccountFrozen.JsonResponse(c)
 		return
 	}
-	fmt.Println("apapapapa")
+	//fmt.Println("apapapapa")
 
 	passOK, err := us.CheckPassword(req.Password)
 	if err != nil {
@@ -75,14 +75,14 @@ func (h *HTTP) login(c *gin.Context) {
 		code.StatusPasswordWrong.JsonResponse(c)
 		return
 	}
-	fmt.Println("apapapapa")
+	//fmt.Println("apapapapa")
 
 	newAPIToken, refreshToken, err := h.reCreateToken(us)
 	if err != nil {
 		code.ServerError.JsonResponse(c)
 		return
 	}
-	fmt.Println("apapapapa")
+	//fmt.Println("apapapapa")
 
 	code.OK.JsonResponse(c, Response{
 		UUID:         us.UUID(),

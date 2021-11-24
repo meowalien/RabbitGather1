@@ -76,6 +76,7 @@ type VCCode struct {
 }
 
 type Config struct {
+	ProjectName string
 	DB DB
 	RBAC RBAC
 	JWT JWT
